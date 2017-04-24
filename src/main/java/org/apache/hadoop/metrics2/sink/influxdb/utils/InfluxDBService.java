@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
@@ -40,6 +41,33 @@ public class InfluxDBService {
 
         httpClient = new DefaultHttpClient();
     }
+    
+    public boolean testConnection() {
+        boolean goodConnection = false;
+        
+        String influxUrl = url + "/query?q=CREATE+DATABASE+" + database;
+        
+        try {
+            HttpPost request = new HttpPost(influxUrl);
+            HttpResponse response = httpClient.execute(request);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if(statusCode != 200 && statusCode != 204) {
+                LOG.info("There was a problem creating the InfluxDB database connection:" + statusCode);
+            } else {
+                goodConnection = true;
+            }
+        } catch (java.net.UnknownHostException e){
+            LOG.error("Invalid Host Exception for InfluxDB:" + influxUrl);
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            LOG.error("ClientProtocolException Exception for InfluxDB:" + influxUrl);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            LOG.error("IOException Exception for InfluxDB:" + influxUrl);
+        }
+        return goodConnection;
+    }
 
     /**
      * Write metrics to influx.
@@ -51,12 +79,15 @@ public class InfluxDBService {
      * @throws IOException
      */
     public boolean write(final String lines) throws IOException {
-        boolean _return;
+        boolean _return = false;
         //String influxUrl = url + "/write?db=" + URLEncoder.encode(database, "UTF-8");
-        String influxUrl = url + "/write" + "" +
+        /*String influxUrl = url + "/write" + "" +
             "?db=" + URLEncoder.encode(database, "UTF-8") +
             "&u=" + URLEncoder.encode(username, "UTF-8") +
             "&p=" + URLEncoder.encode(password, "UTF-8");
+        */
+        String influxUrl = url + "/write" + "" +
+                "?db=" + database;
         HttpPost request = new HttpPost(influxUrl);
         request.setEntity(new ByteArrayEntity(
             lines.getBytes("UTF-8")
@@ -68,8 +99,8 @@ public class InfluxDBService {
         int statusCode = response.getStatusLine().getStatusCode();
         EntityUtils.consume(response.getEntity());
 
-        if (statusCode != 204) {
-            LOG.error("Unable to write or parse: \n" + lines + "\n");
+        if (statusCode != 204 && statusCode != 200) {
+            //LOG.error("Unable to write or parse: \n" + lines + "\n");
             throw new IOException("Error writing metrics influxdb statuscode = " + statusCode);
         }
         else {
