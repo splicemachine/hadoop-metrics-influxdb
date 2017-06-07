@@ -10,46 +10,12 @@ For more details on metrics collected by the Metrics2 framework see this page - 
 # Where is it used in DBAAS
 In the dcos-commons project you will see several configuration files with the format of *Metrics2*.properties located at: https://github.com/splicemachine/dcos-commons/tree/master/frameworks/splicemachine/src/main/dist.  Those files reference this custom sink.
 
-The jar file generated from this build is MANUALLY added to the HADOOP and HBASE tar.gz files.  Those files are then uploaded to the https://s3.amazonaws.com/splicemachine-dev/artifacts/ directory and are referenced in the file https://github.com/splicemachine/dcos-commons/blob/master/frameworks/splicemachine/universe/resource.json.  The current values are:
-
-      "hdfs-tar-gz": "https://s3.amazonaws.com/splicemachine-dev/artifacts/hadoop-2.6.0-cdh5.8.3.tar.gz",
-      "hbase-tar-gz": "https://s3.amazonaws.com/splicemachine-dev/artifacts/hbase-1.2.0-cdh5.8.3.tar.gz",
-
 
 ## How to Build and Deploy
 
 1. Compile the code.
   ```
 mvn clean compile package
-  ```
-
-2. Get the latest HDFS arifact from version of the artifact from hdfs
-  ```
-aws s3 cp s3://splicemachine-dev/artifacts/hbase-1.2.0-cdh5.8.3.tar.gz .
-aws s3 cp s3://splicemachine-dev/artifacts/hadoop-2.6.0-cdh5.8.3.tar.gz .
-  ```
-
-3. Extract the artifact
-  ```
-tar -xvzf hbase-1.2.0-cdh5.8.3.tar.gz
-tar -xvzf hadoop-2.6.0-cdh5.8.3.tar.gz
-  ```
-
-4. Copy the newly created jar file to the proper directory
-  ```
-cp hadoop-metrics-influxdb-2.6.0.jar ./hbase-1.2.0-cdh5.8.3/lib
-cp hadoop-metrics-influxdb-2.6.0.jar ./hadoop-2.6.0-cdh5.8.3/share/hadoop/hdfs/lib
-  ```
-
-5. Re-tar the file
-  ```
-tar -zcvf hbase-1.2.0-cdh5.8.3.tar.gz hbase-1.2.0-cdh5.8.3
-tar -zcvf hadoop-2.6.0-cdh5.8.3.tar.gz hadoop-2.6.0-cdh5.8.3
-  ```
-6. Copy the file up to S3
-  ```
-aws s3 cp hbase-1.2.0-cdh5.8.3.tar.gz s3://splicemachine-dev/artifacts/hbase-1.2.0-cdh5.8.3.tar.gz --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-aws s3 cp hadoop-2.6.0-cdh5.8.3.tar.gz s3://splicemachine-dev/artifacts/hadoop-2.6.0-cdh5.8.3.tar.gz --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
   ```
 
 ## Example Config File Entries

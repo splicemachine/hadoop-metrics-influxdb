@@ -41,17 +41,19 @@ public class InfluxDBService {
 
         httpClient = new DefaultHttpClient();
     }
-    
+
     public boolean testConnection() {
         boolean goodConnection = false;
-        
+
         String influxUrl = url + "/query?q=CREATE+DATABASE+" + database;
-        
+
         try {
             HttpPost request = new HttpPost(influxUrl);
             HttpResponse response = httpClient.execute(request);
 
             int statusCode = response.getStatusLine().getStatusCode();
+            EntityUtils.consume(response.getEntity());
+
             if(statusCode != 200 && statusCode != 204) {
                 LOG.info("There was a problem creating the InfluxDB database connection:" + statusCode);
             } else {
@@ -90,7 +92,7 @@ public class InfluxDBService {
                 "?db=" + database;
         HttpPost request = new HttpPost(influxUrl);
         request.setEntity(new ByteArrayEntity(
-            lines.getBytes("UTF-8")
+                lines.getBytes("UTF-8")
         ));
         HttpResponse response = httpClient.execute(request);
 

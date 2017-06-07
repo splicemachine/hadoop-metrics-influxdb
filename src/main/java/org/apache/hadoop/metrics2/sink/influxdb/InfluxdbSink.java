@@ -39,7 +39,7 @@ public class InfluxdbSink implements MetricsSink, Closeable {
     private String influxdbDatabase;
     private String clusterName;
     private String source;
-    
+
     private boolean validConnection = false;
 
     private InfluxDBService influxDBService;
@@ -59,9 +59,9 @@ public class InfluxdbSink implements MetricsSink, Closeable {
      */
     @Override
     public void putMetrics(final MetricsRecord metricsRecord) {
-        
+
         if(!validConnection) return;
-        
+
         StringBuilder lines = new StringBuilder();
         LOG.debug("########## Start Put metric ##########");
         // Configure the hierarchical place to display the graph.
@@ -73,15 +73,15 @@ public class InfluxdbSink implements MetricsSink, Closeable {
             if (val != null && val.length() > 0) {
                 val = val.replace(',','|');
                 tags.append(tag.name())
-                    .append("=")
-                    .append(val)
-                    .append(",");
+                        .append("=")
+                        .append(val)
+                        .append(",");
             }
         }
 
         // Add the clustername to the tags String if defined
         tags.append("cluster=").append(this.clusterName);
-        
+
         if(source != null && source.length() > 0)
             tags.append(",source=").append(this.source);
 
@@ -95,13 +95,13 @@ public class InfluxdbSink implements MetricsSink, Closeable {
             }
 
             lines.append(metric.name().replace(" ", "_"))
-                .append(",")
-                .append(tags.toString().trim())
-                .append(" ")
-                .append("value=")
-                .append(f)
-                .append(" ")
-                .append("\n");
+                    .append(",")
+                    .append(tags.toString().trim())
+                    .append(" ")
+                    .append("value=")
+                    .append(f)
+                    .append(" ")
+                    .append("\n");
         }
         try {
             if (lines.toString() != null) {
@@ -149,7 +149,7 @@ public class InfluxdbSink implements MetricsSink, Closeable {
     private void connect() throws IllegalStateException, IOException {
         LOG.info("Using URL: " + influxdbUrl);
         influxDBService = new InfluxDBService(influxdbUrl, influxdbDatabase, influxdbUsername, influxdbPassword);
-        
+
         validConnection = influxDBService.testConnection();
     }
 
@@ -174,7 +174,7 @@ public class InfluxdbSink implements MetricsSink, Closeable {
 
         this.clusterName = conf.getString("cluster", "hadoop");
         LOG.info("Clustername set to: " + this.clusterName);
-        
+
         this.source = conf.getString("source", "unknown");
         LOG.info("Source set to: " + this.source);
     }
